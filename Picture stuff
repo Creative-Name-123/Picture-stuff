@@ -1,0 +1,50 @@
+from PIL import Image
+im = Image.open("Real Picture.jfif")
+print(im.format, im.size, im.mode)
+moreRectEdits = True
+while moreRectEdits:
+    print("x1:")
+    x1 = int(input())
+    print("y1:")
+    y1 = int(input())
+    print("x2:")
+    x2 = int(input())
+    print("y2:")
+    y2 = int(input())
+    box = (x1, y1, x2, y2)
+    print("rotate clockwise:")
+    clockwise = int(input())
+    region = im.crop(box)
+    region = region.rotate(360-clockwise)
+    print("Flip uppy downy?")
+    flip = input()
+    if flip.lower() == "yes":
+        region = region.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+    print("Flip lefty righty?")
+    flip = input()
+    if flip.lower() == "yes":
+        region = region.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    im.paste(region, box)
+    print("Edit another rectangle?")
+    if not input().lower() == "yes":
+        moreRectEdits = False
+
+# split the image into individual bands
+source = im.split()
+
+R, G, B = 0, 1, 2
+
+# select regions where red is less than 100
+mask = source[R].point(lambda i: i < 100 and 255)
+
+# process the green band
+print("number that does something (I think between 0 and 1):")
+out = source[G].point(lambda i: i * input())
+
+# paste the processed band back, but only where red was < 100
+source[G].paste(out, None, mask)
+
+# build a new multiband image
+im = Image.merge(im.mode, source)
+
+im.show()
