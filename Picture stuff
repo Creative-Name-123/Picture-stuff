@@ -1,8 +1,10 @@
 from PIL import Image
-im = Image.open("Real Picture.jfif")
+im = Image.open("mona lisa.jfif")
 print(im.format, im.size, im.mode)
+print("Middle point: (" + str(im.size[0]/2) + ", " + str(im.size[1]/2) + ")")
 moreRectEdits = True
 while moreRectEdits:
+    print("Enter the coordinates of the rectangle that you want to edit (enter 0, 0, " + str(im.size[0]) + ", " + str(im.size[1]) + " to edit the entire image)")
     print("x1:")
     x1 = int(input())
     print("y1:")
@@ -12,10 +14,11 @@ while moreRectEdits:
     print("y2:")
     y2 = int(input())
     box = (x1, y1, x2, y2)
-    print("rotate clockwise:")
-    clockwise = int(input())
     region = im.crop(box)
-    region = region.rotate(360-clockwise)
+    print("rotate clockwise:")
+    clockwise = input()
+    if not clockwise.lower() == "no":
+        region = region.rotate(360-int(clockwise))
     print("Flip uppy downy?")
     flip = input()
     if flip.lower() == "yes":
@@ -25,26 +28,11 @@ while moreRectEdits:
     if flip.lower() == "yes":
         region = region.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     im.paste(region, box)
+    print("How much do you want to brighten this rectangle? Enter \"1\" to not change anything.")
+    bright = int(input())
+    region = region.point(lambda i: i * bright)  # This doesn't do anything for some reason
     print("Edit another rectangle?")
     if not input().lower() == "yes":
         moreRectEdits = False
-
-# split the image into individual bands
-source = im.split()
-
-R, G, B = 0, 1, 2
-
-# select regions where red is less than 100
-mask = source[R].point(lambda i: i < 100 and 255)
-
-# process the green band
-print("number that does something (I think between 0 and 1):")
-out = source[G].point(lambda i: i * input())
-
-# paste the processed band back, but only where red was < 100
-source[G].paste(out, None, mask)
-
-# build a new multiband image
-im = Image.merge(im.mode, source)
 
 im.show()
