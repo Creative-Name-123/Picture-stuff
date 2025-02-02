@@ -1,38 +1,43 @@
 from PIL import Image
-im = Image.open("mona lisa.jfif")
+im = Image.open("mona lisa.jpg")
 print(im.format, im.size, im.mode)
 print("Middle point: (" + str(im.size[0]/2) + ", " + str(im.size[1]/2) + ")")
 moreRectEdits = True
+response = []
 while moreRectEdits:
     print("Enter the coordinates of the rectangle that you want to edit (enter 0, 0, " + str(im.size[0]) + ", " + str(im.size[1]) + " to edit the entire image)")
     print("x1:")
-    x1 = int(input())
+    response.append(int(input()))
     print("y1:")
-    y1 = int(input())
+    response.append(int(input()))
     print("x2:")
-    x2 = int(input())
+    response.append(int(input()))
     print("y2:")
-    y2 = int(input())
-    box = (x1, y1, x2, y2)
+    response.append(int(input()))
+    box = (response[-4], response[-3], response[-2], response[-1])
     region = im.crop(box)
     print("rotate clockwise:")
-    clockwise = input()
-    if not clockwise.lower() == "no":
-        region = region.rotate(360-int(clockwise))
+    response.append(input())
+    if not response[-1].lower() == "no":
+        region = region.rotate(360-int(response[-1]))
     print("Flip uppy downy?")
-    flip = input()
-    if flip.lower() == "yes":
+    response.append(input())
+    if response[-1].lower() == "yes":
         region = region.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
     print("Flip lefty righty?")
-    flip = input()
-    if flip.lower() == "yes":
+    response.append(input())
+    if response[-1].lower() == "yes":
         region = region.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     im.paste(region, box)
     print("How much do you want to brighten this rectangle? Enter \"1\" to not change anything.")
-    bright = int(input())
-    region = region.point(lambda i: i * bright)  # This doesn't do anything for some reason
+    response.append(int(input()))
+    region = region.point(lambda i: i * response[-1])  # This doesn't do anything for some reason
     print("Edit another rectangle?")
-    if not input().lower() == "yes":
+    response.append(input())
+    if not response[-1].lower() == "yes":
         moreRectEdits = False
 
 im.show()
+print("Your responses:")
+for j in range(len(response)):
+    print(response[j])
