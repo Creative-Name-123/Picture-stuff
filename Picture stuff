@@ -1,9 +1,26 @@
+import os
+import sys
 from PIL import Image
-im = Image.open("mona lisa.jpg")
+from PIL import ImageFilter
+
+response = []
+im = Image.open("mona lisa.jfif")
+out = im.filter(ImageFilter.DETAIL)  # I think this is supposed to help the brightening thing
+print("Would you like to convert your image to a JPEG?")
+response.append(input())
+if response[-1].lower() == "yes":  # Doesn't work
+    for infile in sys.argv[1:]:
+        f, e = os.path.splitext(infile)
+        outfile = f + ".jpg"
+        if infile != outfile:
+            try:
+                with Image.open(infile) as im:
+                    im.save(outfile, "JPEG")
+            except OSError:
+                print("cannot convert", infile)
 print(im.format, im.size, im.mode)
 print("Middle point: (" + str(im.size[0]/2) + ", " + str(im.size[1]/2) + ")")
 moreRectEdits = True
-response = []
 while moreRectEdits:
     print("Enter the coordinates of the rectangle that you want to edit (enter 0, 0, " + str(im.size[0]) + ", " + str(im.size[1]) + " to edit the entire image)")
     print("x1:")
