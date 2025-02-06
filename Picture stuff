@@ -1,7 +1,9 @@
+import time
 import os
 import sys
 from PIL import Image
 from urllib.request import urlopen
+from PIL import ImageEnhance
 
 print("Enter the URL of your image:")
 response = [input()]
@@ -10,7 +12,8 @@ print(im.format, im.size, im.mode)
 print("Middle point: (" + str(im.size[0]/2) + ", " + str(im.size[1]/2) + ")")
 moreRectEdits = True
 while moreRectEdits:
-    print("Enter the coordinates of the rectangle that you want to edit (enter 0, 0, " + str(im.size[0]) + ", " + str(im.size[1]) + " to edit the entire image)")
+    print("Enter the coordinates of the rectangle that you want to edit (enter 0, 0, " + str(im.size[0]) + ", " +
+          str(im.size[1]) + " to edit the entire image)")
     print("x1:")
     response.append(int(input()))
     print("y1:")
@@ -33,8 +36,8 @@ while moreRectEdits:
     response.append(input())
     if response[-1].lower() == "yes":
         region = region.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-    print("How much do you want to brighten this rectangle? Entering a number between 0 and 1 will darken the image,"
-          "and entering a number greater than 1 will brighten the image")
+    print("How much do you want to brighten this rectangle? Entering a number between 0 and 1 will darken the image,")
+    print("and entering a number greater than 1 will brighten the image")
     response.append(float(input()))
     region = region.point(lambda i: i * response[-1])
     im.paste(region, box)
@@ -42,7 +45,16 @@ while moreRectEdits:
     response.append(input())
     if not response[-1].lower() == "yes":
         moreRectEdits = False
-im.show()
+print("How much do you want to enhance this image (the entire image, not just the rectangle)?")
+print("Enter a number greater than 1 to increase the contrast, or a number less than 1 to decrease the contrast")
+response.append(float(input()))
+enh = ImageEnhance.Contrast(im)
+if response[-1] > 1:
+    enh.enhance(response[-1]).show(str((response[-1]-1)*10) + "% more contrast")
+elif response[-1] < 1:
+    enh.enhance(response[-1]).show(str((1-response[-1]) * 10) + "% less contrast")
+else:
+    im.show()
 
 for infile in sys.argv[1:]:         # Doesn't work
     f, e = os.path.splitext(infile)
@@ -51,9 +63,20 @@ for infile in sys.argv[1:]:         # Doesn't work
         try:
             with Image.open(infile) as im:
                 im.save(outfile)
+                print("Image successfully converted to .jpg")
         except OSError:
             print("cannot convert", infile)
+    else:
+        im.save(outfile)
 
 print("Your responses:")
 for j in range(len(response)):
     print(response[j])
+
+input()
+print("Would you like to crash your computer?")
+response.append(input())
+
+while response[-1].lower() == "yes":
+    im.show()
+    time.sleep(0.5)
