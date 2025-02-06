@@ -1,23 +1,11 @@
 import os
 import sys
 from PIL import Image
-from PIL import ImageFilter
+from urllib.request import urlopen
 
-response = []
-im = Image.open("mona lisa.jfif")
-out = im.filter(ImageFilter.DETAIL)  # I think this is supposed to help the brightening thing
-print("Would you like to convert your image to a JPEG?")
-response.append(input())
-if response[-1].lower() == "yes":  # Doesn't work
-    for infile in sys.argv[1:]:
-        f, e = os.path.splitext(infile)
-        outfile = f + ".jpg"
-        if infile != outfile:
-            try:
-                with Image.open(infile) as im:
-                    im.save(outfile, "JPEG")
-            except OSError:
-                print("cannot convert", infile)
+print("Enter the URL of your image:")
+response = [input()]
+im = Image.open(urlopen(response[-1]))
 print(im.format, im.size, im.mode)
 print("Middle point: (" + str(im.size[0]/2) + ", " + str(im.size[1]/2) + ")")
 moreRectEdits = True
@@ -45,16 +33,27 @@ while moreRectEdits:
     response.append(input())
     if response[-1].lower() == "yes":
         region = region.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    print("How much do you want to brighten this rectangle? Entering a number between 0 and 1 will darken the image,"
+          "and entering a number greater than 1 will brighten the image")
+    response.append(float(input()))
+    region = region.point(lambda i: i * response[-1])
     im.paste(region, box)
-    print("How much do you want to brighten this rectangle? Enter \"1\" to not change anything.")
-    response.append(int(input()))
-    region = region.point(lambda i: i * response[-1])  # This doesn't do anything for some reason
     print("Edit another rectangle?")
     response.append(input())
     if not response[-1].lower() == "yes":
         moreRectEdits = False
-
 im.show()
+
+for infile in sys.argv[1:]:         # Doesn't work
+    f, e = os.path.splitext(infile)
+    outfile = f + ".jpg"
+    if infile != outfile:
+        try:
+            with Image.open(infile) as im:
+                im.save(outfile)
+        except OSError:
+            print("cannot convert", infile)
+
 print("Your responses:")
 for j in range(len(response)):
     print(response[j])
